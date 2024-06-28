@@ -1,0 +1,231 @@
+DATAHUB DB CONFIG
+=================
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "entityManagerFactory",
+        transactionManagerRef = "transactionManager",
+        basePackages = {"com.robosoft.ikroya.election.datahub.repository"}
+)
+public class DatahubDBConfig {
+
+    
+    private Gson gson= new Gson();
+
+
+    @Bean(name="dataSource")
+    @ConfigurationProperties(prefix="spring.datahub.datasource")
+    public DataSource dataSource(){
+        AWSSecrets secret= getSecret();
+        return DataSourceBuilder.create()
+                .driverClassName(driverClass)
+                .url("jdbc:" + secret.getEngine() + "://" + secret.getHost() + ":" + secret.getPort() + dbName)
+                .username(secret.getUsername())
+                .password(secret.getPassword())
+                .build();
+
+    }
+
+
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("dataSource") DataSource dataSource) {
+        HashMap<String,Object> properties= new HashMap<>();
+        //properties.put("hibernate.hbm2ddl.auto","update");
+
+        return builder.dataSource(dataSource)
+                .properties(properties)
+                .packages("com.robosoft.ikroya.election.datahub.entity")
+                .persistenceUnit("datahub")
+                .build();
+    }
+
+    private AWSSecrets getSecret() {
+        SecretsManagerClient client = SecretsManagerClient.builder()
+                .credentialsProvider(() -> AwsBasicCredentials.create(accessKey, secretKey))
+                .region(Region.of(region))
+                .build();
+
+        GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
+                .secretId(secretName)
+                .build();
+
+        GetSecretValueResponse getSecretValueResponse;
+
+        try {
+            getSecretValueResponse = client.getSecretValue(getSecretValueRequest);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        if(getSecretValueResponse.secretString() != null) {
+            String secret = getSecretValueResponse.secretString();
+            return gson.fromJson(secret,AWSSecrets.class);
+        }
+        return null;
+    }
+
+
+
+
+    @Bean(name = "transactionManager")
+    public PlatformTransactionManager transactionManager(
+            @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
+    }
+
+}
+
+ELECTION DB CONFIG
+==================
+
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "electionEntityManagerFactory",
+        transactionManagerRef = "electionTransactionManager",
+        basePackages = {"com.robosoft.ikroya.election.electiondb.repository"}
+)
+public class ElectionDBConfig {
+
+    private Gson gson= new Gson();
+
+    @Primary
+    @Bean(name="electionDataSource")
+    @ConfigurationProperties(prefix="spring.electiondb.datasource")
+    public DataSource dataSource(){
+        AWSSecrets secret= getSecret();
+        return DataSourceBuilder.create()
+                .driverClassName(driverClass)
+                .url("jdbc:" + secret.getEngine() + "://" + secret.getHost() + ":" + secret.getPort() + dbName)
+                .username(secret.getUsername())
+                .password(secret.getPassword())
+                .build();
+    }
+
+    private AWSSecrets getSecret() {
+        SecretsManagerClient client = SecretsManagerClient.builder()
+                .credentialsProvider(() -> AwsBasicCredentials.create(accessKey, secretKey))
+                .region(Region.of(region))
+                .build();
+
+        GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
+                .secretId(secretName)
+                .build();
+
+        GetSecretValueResponse getSecretValueResponse;
+
+        try {
+            getSecretValueResponse = client.getSecretValue(getSecretValueRequest);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        if(getSecretValueResponse.secretString() != null) {
+            String secret = getSecretValueResponse.secretString();
+            return gson.fromJson(secret,AWSSecrets.class);
+        }
+        return null;
+    }
+
+
+    @Primary
+    @Bean(name = "electionEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean electionEntityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("electionDataSource") DataSource dataSource) {
+        HashMap<String,Object> properties= new HashMap<>();
+        //properties.put("hibernate.hbm2ddl.auto","update");
+
+        return builder.dataSource(dataSource)
+                .properties(properties)
+                .packages("com.robosoft.ikroya.election.electiondb.entity")
+                .persistenceUnit("election")
+                .build();
+    }
+
+
+    @Primary
+    @Bean(name = "electionTransactionManager")
+    public PlatformTransactionManager electionTransactionManager(
+            @Qualifier("electionEntityManagerFactory") EntityManagerFactory electionEntityManagerFactory) {
+        return new JpaTransactionManager(electionEntityManagerFactory);
+    }
+
+}
+
+ELECTION LS DB CONFIG
+=====================
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "electionLSDBEntityManagerFactory",
+        transactionManagerRef = "electionLSDBTransactionManager",
+        basePackages = {"com.robosoft.ikroya.election.electionLSDB.repository"}
+)
+public class ElectionLSDBConfig {
+
+    private Gson gson= new Gson();
+
+    @Bean(name="electionLSDBDataSource")
+    @ConfigurationProperties(prefix="spring.electionlsdb.datasource")
+    public DataSource dataSource(){
+        AWSSecrets secret= getSecret();
+        return DataSourceBuilder.create()
+                .driverClassName(driverClass)
+                .url("jdbc:" + secret.getEngine() + "://" + secret.getHost() + ":" + secret.getPort() + "/ElectionLSDB")
+                .username(secret.getUsername())
+                .password(secret.getPassword())
+                .build();
+    }
+
+    private AWSSecrets getSecret() {
+        SecretsManagerClient client = SecretsManagerClient.builder()
+                .credentialsProvider(() -> AwsBasicCredentials.create(accessKey, secretKey))
+                .region(Region.of(region))
+                .build();
+
+        GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
+                .secretId(secretName)
+                .build();
+
+        GetSecretValueResponse getSecretValueResponse;
+
+        try {
+            getSecretValueResponse = client.getSecretValue(getSecretValueRequest);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        if(getSecretValueResponse.secretString() != null) {
+            String secret = getSecretValueResponse.secretString();
+            return gson.fromJson(secret,AWSSecrets.class);
+        }
+        return null;
+    }
+
+
+    @Bean(name = "electionLSDBEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean electionLSDBEntityManagerFactory(
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("electionLSDBDataSource") DataSource dataSource) {
+        HashMap<String,Object> properties= new HashMap<>();
+        //properties.put("hibernate.hbm2ddl.auto","update");
+
+        return builder.dataSource(dataSource)
+                .properties(properties)
+                .packages("com.robosoft.ikroya.election.electionLSDB.entity")
+                .persistenceUnit("election")
+                .build();
+    }
+
+
+    @Bean(name = "electionLSDBTransactionManager")
+    public PlatformTransactionManager electionLSDBTransactionManager(
+            @Qualifier("electionLSDBEntityManagerFactory") EntityManagerFactory electionLSDBEntityManagerFactory) {
+        return new JpaTransactionManager(electionLSDBEntityManagerFactory);
+    }
+}
+
+
