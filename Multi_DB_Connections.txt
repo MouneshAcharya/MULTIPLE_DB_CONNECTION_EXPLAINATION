@@ -5,7 +5,7 @@ DATAHUB DB CONFIG
 @EnableJpaRepositories(
         entityManagerFactoryRef = "entityManagerFactory",
         transactionManagerRef = "transactionManager",
-        basePackages = {"com.robosoft.ikroya.election.datahub.repository"}
+        basePackages = {"com.test.data.repository"}
 )
 public class DatahubDBConfig {
 
@@ -36,7 +36,7 @@ public class DatahubDBConfig {
 
         return builder.dataSource(dataSource)
                 .properties(properties)
-                .packages("com.robosoft.ikroya.election.datahub.entity")
+                .packages("com.test.data.entity")
                 .persistenceUnit("datahub")
                 .build();
     }
@@ -85,7 +85,7 @@ ELECTION DB CONFIG
 @EnableJpaRepositories(
         entityManagerFactoryRef = "electionEntityManagerFactory",
         transactionManagerRef = "electionTransactionManager",
-        basePackages = {"com.robosoft.ikroya.election.electiondb.repository"}
+        basePackages = {"com.test.data1.repository"}
 )
 public class ElectionDBConfig {
 
@@ -140,7 +140,7 @@ public class ElectionDBConfig {
 
         return builder.dataSource(dataSource)
                 .properties(properties)
-                .packages("com.robosoft.ikroya.election.electiondb.entity")
+                .packages("com.test.data1.entity")
                 .persistenceUnit("election")
                 .build();
     }
@@ -162,7 +162,7 @@ ELECTION LS DB CONFIG
 @EnableJpaRepositories(
         entityManagerFactoryRef = "electionLSDBEntityManagerFactory",
         transactionManagerRef = "electionLSDBTransactionManager",
-        basePackages = {"com.robosoft.ikroya.election.electionLSDB.repository"}
+        basePackages = {"com.test.data2.repository"}
 )
 public class ElectionLSDBConfig {
 
@@ -215,7 +215,7 @@ public class ElectionLSDBConfig {
 
         return builder.dataSource(dataSource)
                 .properties(properties)
-                .packages("com.robosoft.ikroya.election.electionLSDB.entity")
+                .packages("com.test.data2.entity")
                 .persistenceUnit("election")
                 .build();
     }
